@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI 开发运维体系 / AI DevOps Framework"
+  short_description: "建立可审计的 AI 开发运维基线、首次导览与协作规范。"
+  default_prompt: "使用 $ai-dev-ops-framework 为当前项目建立必需的 P0-P2 AI 开发运维体系。"
