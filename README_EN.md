@@ -22,6 +22,44 @@ This reusable project-level skill establishes an auditable collaboration framewo
 
 P3 (a real-task pilot) and P4 (recurring governance and rollout) are optional and must not be presented as prerequisites for P0–P2 completion.
 
+## Knowledge Repository Layout
+
+The `ai-knowledge/` root contains only the repository entry point, onboarding, and framework-governance documents. All facts describing how the current system works—including architecture, terminology, data dictionaries, domain logic, anti-patterns, and known issues—belong in `ai-knowledge/system/`; the architecture overview specifically belongs in `system/architecture.md`. Original requirements and external contracts belong in `PRD/`, development, research, and validation plans belong in `plan/`, while operational runbooks belong in `ops/`.
+
+See the [knowledge repository layout](references/knowledge-directory-layout.md) for the complete directory tree and ownership boundaries.
+
+## Using This Skill with AI Tools
+
+Keep this repository's directory structure intact, especially `SKILL.md`, `references/`, and `agents/openai.yaml`. `SKILL.md` is the entry point, and its referenced files must remain available through their relative paths.
+
+### Codex
+
+1. Place this repository in a Codex-configured skills directory. A common Windows location is `C:\Users\<username>\.codex\skills\ai-dev-ops-framework`; confirm installation by checking that `ai-dev-ops-framework` appears in Codex's Skills list.
+2. Open Codex in the target-project root and enter:
+
+   ```text
+   Use $ai-dev-ops-framework to establish the required P0-P2 AI development and operations framework for this project.
+   ```
+
+3. On first use, complete P0 and the first-time AI development onboarding. Only after the developer confirms the onboarding should the AI inventory project facts and continue with P1/P2.
+
+### Claude Code
+
+1. Copy or link the complete skill directory to `.agents/skills/ai-dev-ops-framework/` in the target project.
+2. Create or update the target project's root `CLAUDE.md` to import the entry point:
+
+   ```markdown
+   @.agents/skills/ai-dev-ops-framework/SKILL.md
+   ```
+
+3. Start Claude Code from the project root and explicitly ask it to follow this skill for P0-P2. Until onboarding is confirmed, it must not analyze the actual task, inspect project facts, or modify the project.
+
+### Other AI Tools
+
+1. Treat this skill directory as the version-controlled distribution source; after project adoption, `.agents/skills/` is the source of truth for project-level skills.
+2. If the tool supports project instructions or skill synchronization, sync or link `.agents/skills/` to its project-level skills location. Otherwise, require the tool to read the relevant `SKILL.md` directly and follow its linked references as needed.
+3. Declare the skill source, task-based loading rules, and first-time onboarding restriction in the target project's root `AGENTS.md`. See the [project templates](references/project-templates.md) for a minimal template.
+
 ## First-Time AI Development Onboarding
 
 Every project must enforce onboarding through both its root entry point and knowledge skill. When the current developer first uses the current AI tool for development, diagnosis, data repair, or operations, the AI may only check its own local completion state and read the onboarding document. It must not analyze the task, inspect project facts, or make changes until the developer confirms.
@@ -41,6 +79,7 @@ Completion state must exist only in local persistent memory scoped to the curren
 - [P0–P2 implementation guide](references/p0-p2.md)
 - [First-onboarding rules](references/first-onboarding.md)
 - [Project templates](references/project-templates.md)
+- [Knowledge repository layout](references/knowledge-directory-layout.md)
 
 ## Boundaries
 

@@ -18,7 +18,9 @@ description: 在新项目或存量项目建立可审计的 AI 开发与运维协
 
 ## 必须完成：P0-P2
 
-按 [P0-P2 落地指南](references/p0-p2.md) 执行。P0 先建立范围、权威来源和维护责任；P1 再从目标项目提炼知识资产；P2 将其接入项目级 skill 和跨工具入口。每个阶段都必须满足对应验收条件，不能以空泛目录或通用模板替代项目事实。
+按 [P0-P2 落地指南](references/p0-p2.md) 执行。P0 先建立范围、权威来源、维护责任和知识库目录职责；P1 再从目标项目提炼知识资产；P2 将其接入项目级 skill 和跨工具入口。每个阶段都必须满足对应验收条件，不能以空泛目录或通用模板替代项目事实。
+
+`ai-knowledge/` 的根目录只放入口与体系治理文档；系统架构、术语、数据字典、领域逻辑和反模式必须归入 `ai-knowledge/system/`，原始需求归入 `ai-knowledge/PRD/`，开发过程产生的计划归入 `ai-knowledge/plan/`，运行操作知识归入 `ai-knowledge/ops/`。详细目录树、职责边界和命名规则见 [知识库目录规划](references/knowledge-directory-layout.md)。
 
 首次新建时，可使用 [项目模板](references/project-templates.md) 创建最小骨架；随后必须以目标项目实际情况替换所有尖括号占位符。模板不是事实来源。
 
