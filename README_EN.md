@@ -43,9 +43,9 @@ See [Knowledge repository layout](references/knowledge-directory-layout.md) for 
 
 ## First-Time AI Development Onboarding
 
-Every project must enforce onboarding through both its root entry point and knowledge skill. When the current developer first uses the current AI tool for development, diagnosis, data repair, or operations, the AI may only check its own local completion state and read the onboarding document. It must not analyze the task, inspect project facts, or make changes until the developer confirms.
+Every project must enforce onboarding through both its root entry point and knowledge skill. At the start of each relevant task, the AI silently checks its local completion state. A matching record for the current local developer, AI tool, and project skips onboarding—even in a new conversation; only a missing record triggers the onboarding document and confirmation gate.
 
-Completion state must exist only in local persistent memory scoped to the current developer, AI tool, and project identity. Prefer the Git remote URL as the project identity and use the absolute path only when no remote exists. Never store this state in the repository, Git configuration, databases, or any shared medium.
+Completion state must exist only in local persistent memory scoped to the current local developer, AI tool, and project identity, and persist across later conversations. Prefer the Git remote URL as the project identity and use the absolute path only when no remote exists. Never store this state in the repository, Git configuration, databases, or any shared medium; the project P0–P2 plan is not an onboarding-completion marker.
 
 ## How to Use
 
