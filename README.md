@@ -43,9 +43,33 @@ P1 必须将已核对事实写入 `system/`：全量模块清单、模块依赖�
 
 ## 首次 AI 开发导览
 
-每个项目必须在根入口和 knowledge skill 中共同实施首次导览。每次相关任务开始时，AI 先静默检查本地完成状态；若命中“当前本地开发者 + 当前本地 AI 工具 + 当前项目”的完成记录，即使新开对话也直接跳过导览。只有未命中时，才读取导览文档并等待开发者确认；确认前不得分析需求、检索项目事实或修改任何内容。
+每个开发者使用每个 AI 工具时，分别完成一次项目导览。同人同工具的新会话必须查询固定状态，命中后静默跳过人工确认，仍按任务重新加载项目规则。换人或首次换工具独立导览；查询错误不能当作首次使用。
 
-完成状态必须仅保存在"当前本地开发者 + 当前本地 AI 工具 + 当前项目标识"的本地持久记忆中，并跨后续对话保留。项目标识优先使用 Git 远程地址，无远程地址时才使用绝对路径；不得写入仓库、Git 配置、数据库或其他共享介质。项目的 P0–P2 计划状态不是导览完成标记，不能替代或重置本地完成状态。
+框架提供 [状态脚本](scripts/onboarding_state.mjs)，依赖 Node.js 18+ 和 Git，不安装第三方依赖。状态固定存于操作系统账号资料目录的 `.ai-dev-ops/onboarding/`，按开发者、工具和项目隔离，不使用沙箱可改写的 `HOME`、`LOCALAPPDATA`。脚本拒绝任何 Git 仓库内的状态路径，不写数据库或 Git 配置；规则和脚本可提交，个人状态不可提交。多人共用系统账号时必须使用各自稳定的 `--developer` 或本地 `AI_DEV_OPS_DEVELOPER_ID`。
+
+```powershell
+# 从框架源码目录检查目标项目；工具标识必须与当前工具一致。
+node scripts/onboarding_state.mjs check --tool codex --repo <目标项目目录>
+
+# 仅在开发者明确确认导览，或已核实本身份旧确认事实后登记，再回查。
+node scripts/onboarding_state.mjs complete --tool codex --repo <目标项目目录> --confirmed
+node scripts/onboarding_state.mjs check --tool codex --repo <目标项目目录>
+```
+
+返回 `COMPLETED` 时直接进入任务；`MISSING` 仅核实本身份旧本地确认记录，无依据才首次导览；`REQUIRED` 按开发者要求重做；`ERROR` 报告查询问题，不重复导览掩盖错误。项目 P0–P2 进度不代替个人确认。完整命令、退出码、迁移和重置见[本地状态协议](references/first-onboarding.md)。
+
+接入目标项目时，将完整框架目录放到 `.agents/skills/ai-dev-ops-framework/`，同步根入口、导览正文与 knowledge skill 模板，保留 `scripts/` 和 `references/`；不能只复制说明文字。未原生加载根入口的工具，在其项目入口引用 `AGENTS.md`，例如 `CLAUDE.md` 使用 `@AGENTS.md`。是否安装启动 hook 由目标环境决定，未实测时不宣称自动生效。
+
+## 框架开发与验证
+
+维护本仓库遵守 [AGENTS.md](AGENTS.md)，目标项目接入仍按 P0–P2 分阶段进行。修改协议时同步 `SKILL.md`、相关引用、项目模板和中英文 README；不修改用户全局 skill 副本，不将任何目标项目的私有事实或个人状态带入发布源。
+
+```powershell
+node scripts/validate_framework.mjs
+node --test scripts/onboarding_state.test.mjs scripts/validate_framework.test.mjs
+```
+
+静态验证检查文档引用、Markdown 代码块及 skill 入口结构；行为测试只使用仓库外临时目录，覆盖跨进程复用、人员/工具隔离、worktree、错误分流和重置。[持续验证](.github/workflows/validate.yml)在 Windows、Ubuntu 和 Node.js 18、22 上执行相同命令；CI 与真实 AI 客户端的新会话验证分别报告。回滚框架代码不会删除或共享个人本地状态。
 
 ## 使用方式
 
