@@ -43,9 +43,33 @@ See [Knowledge repository layout](references/knowledge-directory-layout.md) for 
 
 ## First-Time AI Development Onboarding
 
-Every project must enforce onboarding through both its root entry point and knowledge skill. At the start of each relevant task, the AI silently checks its local completion state. A matching record for the current local developer, AI tool, and project skips onboarding—even in a new conversation; only a missing record triggers the onboarding document and confirmation gate.
+Each developer completes onboarding separately for each AI tool and project. Every new session must query fixed local state. A matching completion skips the human confirmation while project rules still load for the task. A different developer or new tool onboards independently; query errors are not first use.
 
-Completion state must exist only in local persistent memory scoped to the current local developer, AI tool, and project identity, and persist across later conversations. Prefer the Git remote URL as the project identity and use the absolute path only when no remote exists. Never store this state in the repository, Git configuration, databases, or any shared medium; the project P0–P2 plan is not an onboarding-completion marker.
+The [state script](scripts/onboarding_state.mjs) uses Node.js 18+ and Git without third-party dependencies. State lives under the OS account's profile directory at `.ai-dev-ops/onboarding/`, isolated by developer, tool, and project. It ignores sandbox-rewritten `HOME` and `LOCALAPPDATA` paths and rejects state inside any Git repository. Personal state never enters Git, Git configuration, a database, or shared storage. Shared OS accounts require distinct stable `--developer` IDs or local `AI_DEV_OPS_DEVELOPER_ID` settings.
+
+```powershell
+# Run from the framework checkout; use the current tool's stable ID.
+node scripts/onboarding_state.mjs check --tool codex --repo <project-directory>
+
+# Only after explicit confirmation or verified legacy confirmation, then recheck.
+node scripts/onboarding_state.mjs complete --tool codex --repo <project-directory> --confirmed
+node scripts/onboarding_state.mjs check --tool codex --repo <project-directory>
+```
+
+`COMPLETED` proceeds; `MISSING` permits verified migration for the same identity or first-time onboarding; `REQUIRED` repeats onboarding at the developer's request; `ERROR` reports a query problem instead of showing the guide again. Project P0–P2 progress never substitutes for personal confirmation. See the [local-state protocol](references/first-onboarding.md) for exit codes, migration, and reset.
+
+When integrating, place the complete framework under `.agents/skills/ai-dev-ops-framework/`, including `scripts/` and `references/`, and update the root entry point, onboarding document, and knowledge skill from the templates. Tools without native root-entry discovery need a project entry that imports `AGENTS.md`, such as `@AGENTS.md` in `CLAUDE.md`. Startup hooks require separate environment-specific setup and verification.
+
+## Framework Development and Validation
+
+Follow [AGENTS.md](AGENTS.md) when maintaining this framework; target-project adoption still follows P0–P2. Protocol changes update `SKILL.md`, affected references, templates, and both READMEs. Keep target-project private facts and personal state out of this distribution, and do not edit user-global skill copies.
+
+```powershell
+node scripts/validate_framework.mjs
+node --test scripts/onboarding_state.test.mjs scripts/validate_framework.test.mjs
+```
+
+Static validation checks document links, Markdown fences, and the skill entry structure. Behavioral tests use only temporary directories outside the repository. [CI](.github/workflows/validate.yml) runs the same commands on Windows and Ubuntu with Node.js 18 and 22. Client-session verification remains separate; reverting framework code does not delete or share personal state.
 
 ## How to Use
 

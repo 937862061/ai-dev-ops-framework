@@ -1,0 +1,33 @@
+name: Framework validation
+
+on: [push, pull_request, workflow_dispatch]
+
+# 验证只读取代码，不写回仓库或访问任何真实个人导览状态。
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ['18', '22']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+      - name: 检查脚本语法
+        run: |
+          node --check scripts/onboarding_state.mjs
+          node --check scripts/onboarding_state.test.mjs
+          node --check scripts/validate_framework.mjs
+          node --check scripts/validate_framework.test.mjs
+      - name: 检查框架入口与文档引用
+        run: node scripts/validate_framework.mjs
+      - name: 验证导览状态行为
+        run: node --test scripts/onboarding_state.test.mjs scripts/validate_framework.test.mjs

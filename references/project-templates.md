@@ -35,9 +35,13 @@ ai-knowledge/
 2. 工具不支持同步时，直接读取 `.agents/skills/` 中对应的 `SKILL.md`，并在交付中说明此回退方式。
 3. 先加载 `<project>-knowledge`；代码改动再加载 `<project>-dev-spec`；线上排查、数据修复、巡检、发布再加载 `<project>-ops`。
 
-首次 AI 开发导览：当前本地开发者首次使用当前本地 AI 工具处理上述任务时，先静默查询本地导览状态。找到匹配记录时直接跳过导览，后续新对话也不得重复展示或确认；未找到记录时才可阅读 `ai-knowledge/ai-development-onboarding.md`，说明体系后等待开发者确认。确认前不得检索当前需求相关代码、知识库、配置、表结构、接口、日志、Git 历史或外部资料，也不得分析需求或修改项目。
+每个新会话先运行固定查询（Node.js 18+）：`node .agents/skills/ai-dev-ops-framework/scripts/onboarding_state.mjs check --tool <当前工具稳定标识> --repo .`。工具标识如 codex、claude-code、cursor，不随会话或模型变化，不借用其他工具身份。每个开发者、每个工具分别完成一次导览；共用系统账号时，用 --developer 或本地 AI_DEV_OPS_DEVELOPER_ID 指定独立稳定的个人标识。
 
-导览完成状态只可保存在当前 AI 工具的本地持久记忆中，并跨后续对话保留；状态同时隔离当前本地开发者、当前本地 AI 工具和项目标识，项目标识优先为 Git 远程地址，无远程地址时使用项目绝对路径。严禁写入仓库、Git 配置、数据库或共享介质；项目 `plan/` 状态不是导览完成标记。
+COMPLETED（退出码 0）直接进入任务，不重复展示导览，仍加载项目规范；MISSING（10）仅核实本开发者、本工具、本项目旧本地确认记录，有依据才迁移，无依据才只读 ai-knowledge/ai-development-onboarding.md 并等待确认；REQUIRED（10）重新导览，禁止迁回旧记录；ERROR（20）报告查询问题，不能当作首次使用或已完成。
+
+明确确认或核实旧确认事实后才执行同身份的 complete --confirmed，再次 check 成功后进入需求分析。仅开发者要求重做时执行 reset，新会话不得清除旧记录。确认前只允许状态检查、读取状态协议和导览正文，不检索当前需求事实或执行变更。
+
+状态固定在操作系统账号资料目录下的 .ai-dev-ops/onboarding/，不使用沙箱可能改写的 HOME、LOCALAPPDATA，按开发者、工具和规范化 Git 远程地址（无远程才用绝对路径）隔离。脚本拒绝仓库内状态，不写工作区、Git 配置、数据库或共享介质；plan/ 进度不代替个人确认。完整协议见 .agents/skills/ai-dev-ops-framework/references/first-onboarding.md；规则与脚本可提交，个人状态不可提交。
 
 完成改动后，检查受影响知识资产是否需要同步；交付中区分已完成静态核对和未执行的运行、接口、数据库或第三方验证。
 ```
@@ -55,7 +59,9 @@ ai-knowledge/
 
 AI 会按需阅读知识，不会把所有文档加载进上下文；会定位真实入口、服务、数据访问与表字段。概念有歧义时会停止猜测，跨模块/状态流转/范围不清时会先给出概念理解确认清单。开发者确认业务语义、范围及高风险动作；AI 说明事实来源、验证结果与未验证项，并在必要时更新知识库。
 
-首次导览只允许读取本文件与检查工具本地状态。工具找到当前本地开发者、当前本地 AI 工具和项目标识的匹配完成记录时，后续对话直接跳过本导览；开发者明确确认“已阅读导览，可以开始”后，AI 才能分析实际任务并将状态持久保存在本地，不进入项目或其他共享介质。
+每个新会话按根 AGENTS.md 执行 onboarding_state.mjs check：COMPLETED 跳过本导览；MISSING 只核实本身份旧本地确认记录，有依据才迁移，无依据才首次导览；REQUIRED 重新导览，不恢复旧状态；ERROR 报告失败，不能当作首次使用。
+
+确认前仅允许状态检查、读取本文件和状态协议。明确确认“已阅读导览，可以开始”后，执行同身份的 complete --confirmed 并回查成功，再分析需求。状态按开发者、AI 工具和项目分别存于仓库外固定个人目录，不进 Git、数据库或共享介质；共用系统账号时使用独立个人标识。
 ```
 
 ## knowledge skill 最小模板
@@ -68,7 +74,9 @@ description: <项目名> 的开发、排查、接口和数据任务的知识入�
 
 # <项目名> 知识入口
 
-先静默检查首次导览的本地完成状态；命中当前本地开发者、当前本地 AI 工具和项目标识时直接跳过导览，不能因新对话重复展示。未命中时仅按 `ai-knowledge/ai-development-onboarding.md` 执行导览；开发者确认后仅写入工具本地持久记忆。
+每个新会话先执行根 AGENTS.md 的固定查询：`node .agents/skills/ai-dev-ops-framework/scripts/onboarding_state.mjs check --tool <本工具稳定标识> --repo .`。COMPLETED 跳过导览但仍加载规范；MISSING 只核实本身份旧本地确认记录，有依据才迁移，无依据才首次导览；REQUIRED 重新导览，禁止迁回旧状态；ERROR 报告原因，不重复导览掩盖查询错误。
+
+明确确认或核实旧确认事实后才执行同身份的 complete --confirmed 并回查；未确认不登记，仅开发者要求重做时 reset。状态按开发者、工具和项目存于仓库外固定个人目录，不进 Git 或数据库，不跨人跨工具复用；共用账号用独立稳定开发者标识。完整协议见 `.agents/skills/ai-dev-ops-framework/references/first-onboarding.md`。
 
 确认后按需加载：`ai-knowledge/system/architecture.md` 用于定位；`system/` 下的术语词典、数据字典、反模式记录按关键词检索；仅读取 `system/` 下相关域的逻辑文档；`PRD/` 仅在需求溯源或外部对接时读取；`ops/` 仅在运维任务时读取；已知问题仅在开发者要求分析时读取。
 

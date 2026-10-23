@@ -4,13 +4,14 @@
 
 ## 本地导览状态与项目计划状态
 
-每次开发、排查或运维任务开始时，先静默检查本地导览完成记录。记录存在时，跳过导览并按项目计划文件的当前阶段继续；不能因为新对话或计划仍处于 P0/P1 而重新弹出导览。记录不存在时，才进入导览阶段并等待开发者确认；确认后写入本地记录。项目计划文件只记录体系建设进度，不能替代、覆盖或清除本地导览记录。
+每个新会话先执行[本地状态协议](first-onboarding.md)的固定 `check`。`COMPLETED` 跳过导览按计划继续；`MISSING` 只核实本身份旧确认记录，有证据才迁移，无证据才导览；`REQUIRED` 重做且不迁回旧状态；`ERROR` 报告问题，不能当作首次使用。明确确认后 `complete --confirmed` 并回查成功；状态只在仓库外按开发者、工具和项目隔离。计划进度不能替代或清除个人记录，新会话及基线维护不重启已完成导览。
 
 ## P0：建立入口并等待确认
 
 首次调用且计划不存在时，只能创建下列骨架，不得检索目标项目代码、配置、表、日志、接口、外部资料或既有业务知识：
 
 - 根 `AGENTS.md`；
+- 框架 `scripts/onboarding_state.mjs`，供根入口与 knowledge skill 执行固定状态查询；
 - `ai-knowledge/readme.md`、`ai-knowledge/ai-development-onboarding.md`；
 - `ai-knowledge/PRD/`、`plan/`、`system/`、`ops/` 目录；
 - `ai-knowledge/plan/ai-dev-ops-plan.md`，记录 P0 范围、权威来源、目录职责、阶段状态和待确认项。
